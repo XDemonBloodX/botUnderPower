@@ -1,4 +1,3 @@
-const { link } = require('fs');
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 var dateFormat = require("dateformat");
@@ -7,12 +6,20 @@ fs = require('fs');
 var now = new Date();
 const today = dateFormat(now, "HH-MM_dd-mm-yyyy");
 const todayH = today.replace("-", "h");
-puppeteer.use(StealthPlugin())
-puppeteer.launch({ headless: true }).then(async browser => {
+puppeteer.use(StealthPlugin());
+
+//true for hidden Chromium
+puppeteer.launch({
+    headless: true,
+    args: [
+        "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36"
+    ]
+}).then(async browser => {
     console.log('✷ Running browser..')
+
     const page = await browser.newPage()
     await page.goto('https://nationsglory.fr/server/blue/countries')
-    await page.waitForTimeout(5000)
+    await page.waitForTimeout(8000)
     const hrefs = await page.$$eval("tr > td > a", (list) => list.map((elm) => elm.href));
     const links = [];
     let message = "";
@@ -25,8 +32,8 @@ puppeteer.launch({ headless: true }).then(async browser => {
     for (let i = 0; i < linkLength; i++) {
         let pay = links[i].substring(37, links[i].length)
 
-        await page.goto(links[i]);
-        await page.waitForTimeout(5000);
+        await page.goto(links[i])
+        await page.waitForTimeout(500);
         const claims = await page.evaluate(() => Array.from(document.querySelectorAll(".mb-2"), element => element.textContent));
         const powers = await page.evaluate(() => Array.from(document.querySelectorAll(".col-md-3 > .mb-2"), element => element.textContent));
         const members = await page.evaluate(() => Array.from(document.querySelectorAll(".pl-4 > a > div"), element => element.textContent));

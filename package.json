@@ -11,14 +11,11 @@
     "dependencies": {
         "@antiadmin/anticaptchaofficial": "^1.0.13",
         "captcha-solver": "0.0.6",
-        "cloudflare-scraper": "^1.0.7",
         "dateformat": "^4.5.1",
         "form-data": "^3.0.0",
         "node-schedule": "^2.0.0",
-        "promise-poller": "^1.9.1",
         "puppeteer": "^7.0.1",
         "puppeteer-extra": "^3.1.16",
-        "puppeteer-extra-plugin-recaptcha": "^3.3.2",
         "puppeteer-extra-plugin-stealth": "^2.7.4",
         "request-promise-native": "^1.0.9",
         "sleep": "^6.3.0"
