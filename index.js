@@ -1,14 +1,39 @@
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-var dateFormat = require("dateformat");
 
-fs = require('fs');
-var now = new Date();
-const today = dateFormat(now, "HH-MM_dd-mm-yyyy");
-const todayH = today.replace("-", "h");
+/* DATABASE*/
+const mongoose = require("mongoose");
+mongoose.set('useFindAndModify', false);
+console.log('connect db', 1);
+mongoose.connect("mongodb://localhost:27017/" + "underPower", {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+}).then(() => {
+    //If it connects log the following
+    console.log("Connected to the Mongodb database.", "log");
+}).catch((err) => {
+    console.log("Unable to connect to the Mongodb database. Error:" + err, "error");
+});
+const Schema = mongoose.Schema;
+const underPowerSchema = new Schema({
+    nameCountry: {
+        type: String
+    },
+    power: {
+        type: Number
+    },
+    claims: {
+        type: Number
+    }
+}, {
+    timestamps: true
+});
+/* ----------*/
+
+// compile schema to model
+let underPower = mongoose.model('Chill', underPowerSchema, 'underPower');
+
 puppeteer.use(StealthPlugin());
-
-//true for hidden Chromium
 puppeteer.launch({
     headless: true,
     args: [
@@ -18,38 +43,37 @@ puppeteer.launch({
     console.log('✷ Running browser..')
 
     const page = await browser.newPage()
-    await page.goto('https://nationsglory.fr/server/blue/countries')
+    await page.goto('https://nationsglory.fr/server/yellow/countries')
     await page.waitForTimeout(8000)
+
     const hrefs = await page.$$eval("tr > td > a", (list) => list.map((elm) => elm.href));
     const links = [];
-    let message = "";
+
     hrefs.forEach(hf => {
-        if (hf.startsWith('https://nationsglory.fr/country/blue/') == true) {
+        if (hf.startsWith('https://nationsglory.fr/country/yellow/') == true) {
             links.push(hf)
         }
     });
     const linkLength = links.length / 2;
     for (let i = 0; i < linkLength; i++) {
-        let pay = links[i].substring(37, links[i].length)
+        let pay = links[i].substring(39, links[i].length)
 
         await page.goto(links[i])
-        await page.waitForTimeout(500);
+        await page.waitForTimeout(1000);
         const claims = await page.evaluate(() => Array.from(document.querySelectorAll(".mb-2"), element => element.textContent));
         const powers = await page.evaluate(() => Array.from(document.querySelectorAll(".col-md-3 > .mb-2"), element => element.textContent));
-        const members = await page.evaluate(() => Array.from(document.querySelectorAll(".pl-4 > a > div"), element => element.textContent));
 
-        let level = claims[2];
         let power = powers[1].split("/");
         let claim = claims[4];
         power = parseInt(power[0], 10)
         claim = parseInt(claim, 10)
-        console.log("n°" + i + " ☛\t Country: " + pay + "\t♝ level: " + level)
+        console.log(pay, power, claim)
 
         if (power < claim) {
-            console.log("n°" + i + pay + " → ♝ level: " + level + " → ♚ power: " + power, " → ♛ claim: " + claim + " → ♟members: " + "\n" + "members: " + members + "\n")
-            message = "🌐" + pay + "\t⌛️level: " + level + "\t→ 💪🏼power: " + power + "\t📍claim: " + claim + "\t🔗link : " + links[i] + "\n" + "members: " + members + "\n";
-            fs.appendFile('underPower/results👨🏼‍💻' + todayH + '.txt', message, 'utf8', function(err) {
-                if (err) return console.log(err);
+            let uP = new underPower({ nameCountry: pay, power: power, claims: claim });
+            uP.save(function(err, book) {
+                if (err) return console.error(err);
+                console.log(uP.nameCountry + " saved to collection.");
             });
         }
     }
