@@ -1,6 +1,6 @@
 # botUnderPower
 Look package.json -> "license": "ISC"  
-## Copyright (C) <année(s)> <détenteur(s) du droit d'auteur>
+## Copyright (C) 2021 Tanguy PALMIE
 
 > Permission to use, copy, modify, and/or distribute this software for any
 purpose with or without fee is hereby granted, provided that the above
